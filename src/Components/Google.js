@@ -6,7 +6,7 @@ class Google extends Component {
         console.log(contacts);
         return (
             <div className="container" style={{ "margin": "70px" }}>
-                <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                <main role="main" className="col-md-9 ml-sm-auto col-lg-10 px-4">
                     <div className="col-md-6 col-md-offset-3">
                         <div>
                             <h2>Google Page</h2>
@@ -15,12 +15,12 @@ class Google extends Component {
                                 {this.props.location.state.email}
                             </h3>
                             {contacts.entry.map((e, index) => (
-                                <div class="flip-card">
-                                    <div class="flip-card-inner">
-                                        <div class="flip-card-front">
+                                <div className="flip-card">
+                                    <div className="flip-card-inner">
+                                        <div className="flip-card-front">
                                             <img src="https://img.icons8.com/plasticine/300/000000/contacts.png"></img>
                                         </div>
-                                        <div class="flip-card-back">
+                                        <div className="flip-card-back">
                                             <div key={index}>
                                                 <h1>{e.title.$t ? e.title.$t : "No Name"}</h1>
                                             </div>

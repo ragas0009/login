@@ -57,6 +57,11 @@ class Login extends Component {
             "http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js";
         script2.async = true;
         document.body.appendChild(script2);
+        const script3 = document.createElement("script");
+        script3.src =
+            "https://apis.google.com/js/api.js";
+        script3.async = true;
+        document.body.appendChild(script3);
     }
 
     handleChange(e) {
@@ -145,40 +150,71 @@ class Login extends Component {
 
     render() {
         const responseGoogle = response => {
+
+            var config = {
+                'client_id': '942448994086-hjup9f33s70ditnb5vf81v4resdrea2t.apps.googleusercontent.com',
+                'scope': 'https://www.google.com/m8/feeds'
+            };
+            var token = window.gapi.auth.getToken().access_token;
+            console.log(token);
+            window.gapi.auth.authorize(config, function () {
+                fetch("https://www.google.com/m8/feeds/contacts/default/full?alt=json&access_token=" + token)
+                    .then(response => {
+
+                        console.log("responseGoogle: " + JSON.stringify(response));
+                        if (!response.ok) {
+                            throw Error("Network request failed");
+                        }
+                        if (response.ok) {
+                        }
+                        return response;
+                    })
+                    .then(d => d.json())
+                    .then(
+                        d => { console.log(d) },
+                        (error) => { console.log("error: " + error) }
+                    );
+            });
+
             var profile = response.getBasicProfile();
             this.setState({ user: profile });
-            var auth_token =
-                "ya29.GlvCBt2DNtHUPgxjwZ-G3OfBDycgOppMsWJa57alP-msLtAnsuPwwrUIrc1UYQJ3AtUCw3EUZ82M88-0QX5jF7b2_bCo6OqP6s3zHJVM-Fekw-vM5MBgI8Jjycu9";
+            // var auth_token =
+            //     "ya29.GlvCBk1doAcYBIeEupVQ1Bcx6B93gefXJ1V1JciOn6vl7BwbzU0C7m6icW7bQ7kHM-4fUyA1_VyCZEpcLAT3Z5A4ZSVfaXnGn89SRu_MtnB_fGjUEkoxUhpo6Bz6";
 
-            var GoogleContactsUrl =
-                "https://www.google.com/m8/feeds/contacts/" +
-                profile.getEmail() +
-                "/full?alt=json&access_token=" +
-                auth_token;
-            fetch(GoogleContactsUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw Error("Network request failed");
-                    }
-                    if (response.ok) {
-                    }
-                    return response;
-                })
-                .then(d => d.json())
-                .then(
-                    d => {
-                        this.setState({
-                            contacts: d
-                        });
-                        pushToGoogleDashboard(d);
-                    },
-                    () => {
-                        this.setState({
-                            requestFailed: true
-                        });
-                    }
-                );
-        };
+            // var GoogleContactsUrl =
+            //     "https://www.google.com/m8/feeds/contacts/" +
+            //     profile.getEmail() +
+            //     "/full?alt=json"
+            // // + "&access_token=" +
+            // // auth_token;
+            // console.log(GoogleContactsUrl);
+            window.gapi.auth.authorize(config, function () {
+                fetch("https://www.google.com/m8/feeds/contacts/default/full?alt=json&access_token=" + token)
+                    .then(response => {
+
+                        console.log("responseGoogle: " + JSON.stringify(response));
+                        if (!response.ok) {
+                            throw Error("Network request failed");
+                        }
+                        if (response.ok) {
+                        }
+                        return response;
+                    })
+                    .then(d => d.json())
+                    .then(
+                        d => {
+
+                            console.log(d)
+                            pushToGoogleDashboard(d);
+                        },
+                        () => {
+                            this.setState({
+                                requestFailed: true
+                            });
+                        }
+                    );
+            });
+        }
         const pushToGoogleDashboard = data => {
             this.props.history.push({
                 pathname: "/Google",
@@ -192,6 +228,7 @@ class Login extends Component {
         const url =
             "http://api.instagram.com/v1/users/self/media/recent/?access_token=";
         const responseInstagram = response => {
+            console.log(JSON.stringify(response));
             console.log(url + response);
             fetch(url + response)
                 .then(response => response.json())
@@ -209,7 +246,7 @@ class Login extends Component {
             });
         };
         const responseErrorInstagram = response => {
-            console.log("error");
+            console.log("error: " + JSON.stringify(response));
         };
         const { username, password } = this.state;
         var isEnabled = this.validateForm();
@@ -270,6 +307,7 @@ class Login extends Component {
                                         buttonText="LOGIN WITH GOOGLE"
                                         onSuccess={responseGoogle}
                                         onFailure={errorResponseGoogle}
+                                        scope="email profile openid https://www.google.com/m8/feeds/"
                                     />
                                     <FacebookLogin
                                         appId="401631383932460"
@@ -280,11 +318,13 @@ class Login extends Component {
                                         icon="fab fa-facebook-f mr-2"
                                     />
                                     <InstagramLogin
-                                        clientId="b8bcba25d13c4440ba489d41fc127726"
+                                        clientId="01995d823f354deda41e0f2342c37aae"
+                                        //clientId="b8bcba25d13c4440ba489d41fc127726"
                                         buttonText="Login With Instagram"
                                         onSuccess={responseInstagram}
                                         onFailure={responseErrorInstagram}
                                         implicitAuth={true}
+                                        //scope="likes+comments+follower_list"
                                         scope="likes+comments+follower_list"
                                         cssClass="btn btn-lg btn-facebook btn-block text-uppercase"
                                         style={{ "background-color": "red" }}
