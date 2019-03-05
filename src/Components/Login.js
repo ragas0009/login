@@ -129,23 +129,7 @@ class Login extends Component {
                 errors["password"] = "*Please enter secure and strong password.";
             }
         }
-        //this.setState({      errors: errors    });
         return formIsValid;
-    };
-
-    responseFacebook = response => {
-        console.log(response);
-        if (response !== undefined) {
-            this.pushDataToFacebook(response);
-        }
-    };
-    pushDataToFacebook = response => {
-        if (response !== undefined) {
-            this.props.history.push({
-                pathname: "/Facebook",
-                fbData: response
-            });
-        }
     };
 
     render() {
@@ -178,16 +162,6 @@ class Login extends Component {
 
             var profile = response.getBasicProfile();
             this.setState({ user: profile });
-            // var auth_token =
-            //     "ya29.GlvCBk1doAcYBIeEupVQ1Bcx6B93gefXJ1V1JciOn6vl7BwbzU0C7m6icW7bQ7kHM-4fUyA1_VyCZEpcLAT3Z5A4ZSVfaXnGn89SRu_MtnB_fGjUEkoxUhpo6Bz6";
-
-            // var GoogleContactsUrl =
-            //     "https://www.google.com/m8/feeds/contacts/" +
-            //     profile.getEmail() +
-            //     "/full?alt=json"
-            // // + "&access_token=" +
-            // // auth_token;
-            // console.log(GoogleContactsUrl);
             window.gapi.auth.authorize(config, function () {
                 fetch("https://www.google.com/m8/feeds/contacts/default/full?alt=json&access_token=" + token)
                     .then(response => {
@@ -224,19 +198,17 @@ class Login extends Component {
         const errorResponseGoogle = response => {
             this.setState({ message: "Invalid Credentials" });
         };
-
-        const url =
-            "http://api.instagram.com/v1/users/self/media/recent/?access_token=";
         const responseInstagram = response => {
+            this.setState({ isInstaLogin: true })
             console.log(JSON.stringify(response));
-            console.log(url + response);
-            fetch(url + response)
-                .then(response => response.json())
+            fetch("http://api.instagram.com/v1/users/self/media/recent/?access_token=" + JSON.stringify(response))
+                .then(d => { d.json(); console.log(JSON.stringify(d)) })
                 .then(data => {
                     console.log(data);
-                    pushToInstagram(data);
+                    if (data !== undefined) {
+                        pushToInstagram(data);
+                    }
                 })
-
                 .catch(error => console.log(error));
         };
         const pushToInstagram = instaData => {
@@ -247,6 +219,17 @@ class Login extends Component {
         };
         const responseErrorInstagram = response => {
             console.log("error: " + JSON.stringify(response));
+        };
+        const responseFacebook = response => {
+            this.setState({ isInstaLogin: false })
+            console.log("facebook console");
+            console.log(JSON.stringify(response));
+            if (this.state.isInstaLogin === false) {
+                this.props.history.push({
+                    pathname: "/Facebook",
+                    fbData: response
+                });
+            }
         };
         const { username, password } = this.state;
         var isEnabled = this.validateForm();
@@ -311,24 +294,27 @@ class Login extends Component {
                                     />
                                     <FacebookLogin
                                         appId="401631383932460"
-                                        fields="name,email,friends,picture"
-                                        scope="public_profile,email,user_friends"
-                                        callback={this.responseFacebook}
-                                        cssClass="btn btn-lg btn-facebook btn-block text-uppercase"
-                                        icon="fab fa-facebook-f mr-2"
+                                        autoLoad={false}
+                                        fields="name,email,picture"
+                                        scope="public_profile,email"
+                                        callback={responseFacebook}
                                     />
-                                    <InstagramLogin
+                                    {/* <InstagramLogin
                                         clientId="01995d823f354deda41e0f2342c37aae"
                                         //clientId="b8bcba25d13c4440ba489d41fc127726"
                                         buttonText="Login With Instagram"
                                         onSuccess={responseInstagram}
                                         onFailure={responseErrorInstagram}
                                         implicitAuth={true}
-                                        //scope="likes+comments+follower_list"
                                         scope="likes+comments+follower_list"
                                         cssClass="btn btn-lg btn-facebook btn-block text-uppercase"
                                         style={{ "background-color": "red" }}
-                                    />
+                                    /> */}
+                                    <InstagramLogin
+                                        clientId="01995d823f354deda41e0f2342c37aae"
+                                        onSuccess={responseInstagram}
+                                        onFailure={responseErrorInstagram}
+                                    >Login with Instagram</InstagramLogin>
                                 </div>
                             </div>
                         </div>
